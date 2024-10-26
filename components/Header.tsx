@@ -3,14 +3,14 @@ import React from 'react'
 import Image from 'next/image'
 import {MagnifyingGlassCircleIcon, UserCircleIcon} from '@heroicons/react/24/solid'
 import Avatar from 'react-avatar'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/store/store'
+import { setSerchString } from '@/store/slices/BordSlice'
 
-import { useBoardStore } from '@/store/BordStore'
 
 function Header() {
-  const [serchString, setSerchString] = useBoardStore((state) => [
-    state.serchString,
-    state.setSerchString,
-  ])
+    const dispatch = useDispatch()
+    const serchString : string = useSelector((state: RootState) => state.bord.serchString)
 
   return (
     <header>
@@ -42,7 +42,7 @@ function Header() {
         <div className='flex items-center center space-x-5 flex-1 justify-end w-full'>
           <form className='flex items-conter space-x-5 bg-white p-2 shadow-md flex-1 md:flex-initial'>
             <MagnifyingGlassCircleIcon className='h-6 w-6 text-gray-400 '/>
-            <input type="text" className='flex-1 outline-none' value={serchString} onChange={e => setSerchString(e.target.value)} placeholder='Search..'/>
+            <input type="text" className='flex-1 outline-none' value={serchString} onChange={e => dispatch(setSerchString(e.target.value))} placeholder='Search..'/>
             <button type='submit' hidden> Search</button>
           </form>
           <Avatar name='Ziad Mohamed' round color='#0055dd' size='50' />

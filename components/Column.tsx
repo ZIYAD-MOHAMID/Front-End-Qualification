@@ -1,12 +1,16 @@
+"use client"
+
 import React from 'react'
 import {Draggable, Droppable} from 'react-beautiful-dnd'
 import { PlusCircleIcon } from '@heroicons/react/24/solid'
 
 import { Todo, TypeColum } from '@/tyoing'
-import { useBoardStore } from '@/store/BordStore'
-import { useModalStore } from '@/store/ModalStore'
 
 import TodoCard from './TodoCard'
+import { useDispatch, useSelector } from 'react-redux'
+import { bordActions } from '@/store/slices/BordSlice'
+import { modalActions } from '@/store/slices/ModalSlice'
+import { RootState } from '@/store/store'
 
 type Props = {
     id: TypeColum,
@@ -23,15 +27,12 @@ const isToColumnText: {
 }
 
 function Column({ id, todos, index }: Props) {
-    
-    const [serchString] = useBoardStore((state) => [state.serchString])
-    const setNewTaskType = useBoardStore((state) => state.setNewTaskType)
-    
-    const [openModel] = useModalStore((state) => [state.openModals])
+    const serchString: string = useSelector((state: RootState) => state.bord.serchString)
+    const dispatch = useDispatch()
 
     const handelAddTodo = () => {
-        setNewTaskType(id)
-        openModel()
+        dispatch(bordActions.setNewTaskType(id))
+        dispatch(modalActions.openModals())
     }
     
   return (

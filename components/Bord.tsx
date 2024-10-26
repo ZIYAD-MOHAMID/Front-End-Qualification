@@ -1,39 +1,36 @@
 'use client'
 import React, { useEffect } from 'react'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
-
-import { Column as Columna } from '../tyoing'
-import { useBoardStore } from '@/store/BordStore'
-
+import { Column as Columna ,Board} from '../tyoing'
 import Column from './Column'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/store/store'
+import { getBord, setBoardState, updateTodoInDB } from '@/store/slices/BordSlice'
 
 function Bord() {
-  const [board, getBoard, setBoardState, updateTodoInDB] = useBoardStore((state) => [
-    state.board,
-    state.getBoard,
-    state.setBoardState,
-    state.updateTodoInDB,
-  ])
 
+    const dispatch = useDispatch()
+    const bord: Board = useSelector((state: RootState) => state.bord)
+    
   useEffect(() => {
-    getBoard()
-  }, [getBoard])
+    dispatch(getBord())
+  }, [dispatch(getBord())])
 
   const handleOnDragEnd = (result: any) => {
     const { destination, source, type } = result;
     if(!destination) return
     
     if (type === 'column') {
-      const entries = Array.from(board.columns.entries())
+      const entries = Array.from(bord.columns.entries())
       const [removed] = entries.splice(source.index, 1)
       entries.splice(destination.index, 0, removed)
       const rearrangedColumns = new Map(entries)
-      setBoardState({
-        ...board,
+      dispatch(setBoardState({
+        ...bord,
         columns: rearrangedColumns
-      })
+      }))
     }
-    const columns = Array.from(board.columns)
+    const columns = Array.from(bord.columns)
     const startColIndex = columns[Number(source.droppableId)]
     const finishColIndex = columns[Number(destination.droppableId)]
     
@@ -59,17 +56,17 @@ function Bord() {
         id: startCol.id,
         todos: newTodos,
       }
-      const newColums = new Map(board.columns)
+      const newColums = new Map(bord.columns)
       newColums.set(startCol.id, newCol)
 
-      setBoardState({
-        ...board, columns: newColums
-      })
+      dispatch(setBoardState({
+        ...bord, columns: newColums
+      }))
     } else {
       const finishTodos = Array.from(finishCol.todos)
       finishTodos.splice(destination.index, 0, todoMoved)
        
-      const newColums = new Map(board.columns)
+      const newColums = new Map(bord.columns)
       const newCol: Columna = {
         id: startCol.id,
         todos: newTodos,
@@ -81,11 +78,11 @@ function Bord() {
         todos: finishTodos,
       })
       
-      updateTodoInDB(todoMoved, finishCol.id)
+      dispatch(updateTodoInDB(todoMoved ,finishCol.id ))
 
-      setBoardState({
-        ...board, columns: newColums
-      })
+      dispatch(setBoardState({
+        ...bord, columns: newColums
+      }))
     }
   }
   
@@ -99,7 +96,7 @@ function Bord() {
               {...provided.droppableProps}
               ref={provided.innerRef}
             >{
-              Array.from(board.columns.entries()).map(([id, column], index) => (
+              Array.from(bord.columns.entries()).map(([id, column], index) => (
                 <Column
                   key={id}
                   id = {id}

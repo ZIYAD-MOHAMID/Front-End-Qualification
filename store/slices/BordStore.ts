@@ -1,8 +1,10 @@
+'use client'
+
 import { create } from 'zustand'
 
 import { ID, databases, storage } from '@/appwrith';
 
-import { Column, TypeColum, Board, Todo, Image } from "@/tyoing"
+import { Column, TypeColum, PriorityColum ,Board, Todo, Image } from "@/tyoing"
 
 import { getTodosGroupedbyColumn } from '@/lib/getTOdosGroupedByColumn';
 import uploadImge from '@/lib/uploadImge';
@@ -18,16 +20,21 @@ interface BoardState {
     serchString: string
     setSerchString: (serchString: string) => void
     
-    newTaskInput: string
-    setNewTaskInput: (input: string) => void
+    newTitleInput: string
+    setNewTitleInput: (input: string) => void
+
+    newDescriptionInput: string
+    setNewDescriptionInput: (input: string) => void
     
     newTaskType: TypeColum
     setNewTaskType: (columnId: TypeColum)=> void
+    newTaskPriority : PriorityColum
+    setNewTaskPriority : (columnId: PriorityColum)=> void
 
     image: File | null
     setImage: (image: File | null) => void
 
-    addTask: (todo:string, columnId: TypeColum, Image?:File|null) => void
+    addTask: (todoTitle:string,todoDescription:string, columnId: TypeColum,priorityColum:PriorityColum, Image?:File|null) => void
 }
 
 export const useBoardStore = create<BoardState>((set, get) => ({
@@ -72,16 +79,23 @@ export const useBoardStore = create<BoardState>((set, get) => ({
         );
     },
     
-    newTaskInput: "",
-    setNewTaskInput: (input: string) => set({ newTaskInput: input }),
+    newTitleInput: "",
+    setNewTitleInput: (input: string) => set({ newTitleInput: input }),
+    
+    newDescriptionInput: "",
+    setNewDescriptionInput: (input: string) => set({ newDescriptionInput: input }),
     
     newTaskType: "todo",
-    setNewTaskType: (columnId: TypeColum) => set({ newTaskType: columnId }),
+    setNewTaskType: (columnId: TypeColum) => set({ newTaskType: columnId }),    
+    newTaskPriority : "medium",
+    setNewTaskPriority : (columnId: PriorityColum) => set({ newTaskPriority : columnId }),
     
     image: null,
     setImage: (image: File | null) => set({ image }),
     
-    addTask: async (todo: string, columnId: TypeColum, image?: File | null) => {
+    addTask: async (todoTitle: string, todoDescription: string,
+        columnId: TypeColum, priorityColum: PriorityColum, image?: File | null) =>
+    {
         let file: Image | undefined 
         if (image) {
             const fileUploaded = await uploadImge(image)
@@ -97,19 +111,24 @@ export const useBoardStore = create<BoardState>((set, get) => ({
             process.env.NEXT_PUBLIC_TODOS_COLLECTION_ID!,
             ID.unique(),
             {
-                title: todo,
+                title: todoTitle,
+                description: todoDescription,
                 status: columnId,
+                priority : priorityColum,
                 ...(file && { image: JSON.stringify(file)})
             }
         )
-        set({ newTaskInput: "" })
+        set({ newTitleInput: "" })
+        set({ newDescriptionInput: "" })
         set((state) => {
             const newColumns = new Map(state.board.columns)
             const newTodo: Todo = {
                 $id,
                 $createdAt: new Date().toISOString(),
-                title: todo,
+                title: todoTitle,
+                description: todoDescription,
                 status: columnId,
+                priority: priorityColum,
                 ...(file && {image: file})
             }
             const column = newColumns.get(columnId)

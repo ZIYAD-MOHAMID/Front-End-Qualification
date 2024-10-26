@@ -1,3 +1,5 @@
+"use client"
+
 import { ID, storage } from '@/appwrith'
 
 const uploadImge = async (file: File) => {

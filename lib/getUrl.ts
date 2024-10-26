@@ -1,3 +1,4 @@
+'use client'
 import { storage } from "@/appwrith";
 import { Image } from "@/tyoing";
 
